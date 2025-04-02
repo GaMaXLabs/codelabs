@@ -1,76 +1,108 @@
-# Mi primer contribución
+# Laboratorio: ¡Mi Primera Contribución a GitHub! 🚀
 
-1. Crea una cuenta de Github siguiendo las instrucciones del siguiente enlace:
-   https://docs.github.com/es/get-started/start-your-journey/creating-an-account-on-github#signing-up-for-a-new-personal-account
+## Objetivo
 
-2. Generar las llaves SSH y agregarlas a la configuración de Github siguiendo las instrucciones:
-   https://docs.github.com/es/authentication/connecting-to-github-with-ssh/managing-deploy-keys#set-up-deploy-keys
-3. Navegar a https://github.com/GaMaXLabs/collaborative-timeline
-4. Crear un nuevo fork del repositorio "collaborative-timeline".
-5. Clonar el fork del repositorio localmente usando el botón de "Code" y especificando la opción SSH.
-6. Abrir la terminal de Linux (o WSL)
-7. Navegar al directorio del usuario con:
+Aprender el flujo básico de contribución en GitHub: fork, clonar, crear una rama, modificar un archivo, crear un pull request y solicitar una revisión.
 
-```bash
-  cd ~
-```
+## Requisitos Previos
 
-8. Crear un directorio llamado "repos":
+* Cuenta de GitHub. (Si no tienes una, sigue el paso 1).
+* Git instalado en tu computadora.
+* Editor de código (recomendamos Visual Studio Code).
+* Terminal de Linux o WSL (Windows Subsystem for Linux) si estás en Windows.
 
-```bash
-  mkdir repos
-```
+## Pasos
 
-9. Navegar al directorio "repos" e ingresar el comando:
+### 1. Creación de Cuenta en GitHub (Si no tienes una)
 
-```bash
-  git clone git@github.com:[usuario]/collaborative-timeline.git
-```
+* Sigue las instrucciones en el siguiente enlace: [Crear una cuenta en GitHub](https://docs.github.com/es/get-started/start-your-journey/creating-an-account-on-github#signing-up-for-a-new-personal-account)
 
-10. Navegar al directorio "collaborative-timeline" y abrir Visual Studio Code con el comando:
+### 2. Generación y Configuración de Claves SSH
 
-```bash
-  code .
-```
+* Para una conexión segura, genera llaves SSH y agrégalas a tu cuenta de GitHub: [Configurar llaves SSH](https://docs.github.com/es/authentication/connecting-to-github-with-ssh/managing-deploy-keys#set-up-deploy-keys)
 
-11. Crear una rama local basada en la rama "main" con el comando:
+### 3. Fork del Repositorio
 
-```bash
-  git checkout -b [nombre-de-la-rama]
-```
+* Navega a [https://github.com/GaMaXLabs/collaborative-timeline](https://github.com/GaMaXLabs/collaborative-timeline)
+* Haz clic en el botón "Fork" en la esquina superior derecha para crear una copia del repositorio en tu cuenta.
 
-12. Navegar al directorio "public/template" y copiar el archivo "my_username.md"
-13. Navegar al directorio "public/contributions" y pegar el archivo "my_username.md"
-14. Renombrar el archivo "my_username.md" a "[nombre-del-alumno].md".
-15. Modificar el contenido del archivo "[nombre-del-alumno].md", ingresando el emoji favorito y una frase a elegir.
-16. Guardar cambios.
-17. Agregar cambios locales al area de preparación con el comando:
+### 4. Clonar tu Fork Localmente
 
-```bash
-  git add -A
-```
+* En tu repositorio forked, haz clic en el botón "Code" y copia la URL SSH.
+* Abre tu terminal y navega al directorio donde quieres guardar el repositorio (por ejemplo, `~/repos`).
+    ```bash
+    mkdir repos
+    cd repos
+    ```
+* Clona el repositorio usando la URL SSH copiada.
+    ```bash
+    git clone [https://www.ssh.com/academy/ssh/copy-id](https://www.ssh.com/academy/ssh/copy-id)
+    ```
 
-18. Crear un commit con un mensaje con el commando:
+### 5. Abrir el Proyecto en Visual Studio Code
 
-```bash
-  git commit -m "[Mensaje de commit a elegir]"
-```
+* Navega al directorio del repositorio clonado y abre VS Code.
+    ```bash
+    cd collaborative-timeline
+    code .
+    ```
 
-19. Empujar cambios a el repositorio remoto (en GitHub)
+### 6. Crear una Rama Local
 
-```bash
-  git push --set-upstream origin [nombre-de-la-rama]
-```
+* Crea una nueva rama para tus cambios, reemplazando `[nombre-de-la-rama]` con un nombre descriptivo (por ejemplo, `add-tu-nombre`).
+    ```bash
+    git checkout -b [nombre-de-la-rama]
+    ```
 
-20. Navegar a https://github.com/GaMaXLabs/collaborative-timeline
-21. Ir al menú "Pull Requests"
-22. Hacer click en el botón "Nuevo Pull Request"
-23. Seleccionar repositorio base: "GaMaXLabs/collaborative-timeline"
-24. Seleccionar la rama base: "main"
-25. Seleccionar el repositorio head: [nombre-de-usuario]/collaborative-timeline
-26. Seleccionar rama de comparación: [nombre-de-la-rama]
-27. Verificar cambios a unir.
-28. Hacer click en el botón "Crear Pull Request"
+### 7. Copiar y Renombrar el Archivo de Contribución
 
-Notifica a los ponentes para que revisen y aprueben los cambios propuestos.
-Has publicado tu nueva propuesta de cambio al repositorio. ¡Felicidades! 🚀👏
+* Navega a `public/template` y copia el archivo `my_username.md`.
+* Navega a `public/contributions` y pega el archivo copiado.
+* Renombra el archivo a `[nombre-del-alumno].md`.
+
+### 8. Modificar el Archivo de Contribución
+
+* Abre `[nombre-del-alumno].md` en VS Code.
+* Modifica el contenido del archivo:
+    * Agrega tu emoji favorito.
+    * Escribe una frase personal.
+    * Guarda los cambios.
+
+### 9. Preparar los Cambios para el Commit
+
+* Agrega los cambios al área de preparación.
+    ```bash
+    git add -A
+    ```
+
+### 10. Crear un Commit
+
+* Crea un commit con un mensaje descriptivo.
+    ```bash
+    git commit -m "[Mensaje de commit explicando tus cambios]"
+    ```
+
+### 11. Subir los Cambios a GitHub
+
+* Sube tu rama al repositorio remoto.
+    ```bash
+    git push --set-upstream origin [nombre-de-la-rama]
+    ```
+
+### 12. Crear un Pull Request (PR)
+
+* Navega a [https://github.com/GaMaXLabs/collaborative-timeline](https://github.com/GaMaXLabs/collaborative-timeline) en tu navegador.
+* Ve a la pestaña "Pull requests" y haz clic en "New pull request".
+* Asegúrate de que:
+    * "base repository" sea `GaMaXLabs/collaborative-timeline`.
+    * "base" sea `main`.
+    * "head repository" sea `[tu-usuario]/collaborative-timeline`.
+    * "compare" sea `[tu-rama]`.
+* Revisa los cambios y haz clic en "Create pull request".
+* Agrega un título y una descripción clara para tu PR.
+
+### 13. Notificar la Revisión
+
+* Informa a los ponentes para que revisen y aprueben tu PR.
+
+¡Felicitaciones! Has realizado tu primera contribución a GitHub. 🎉👏🚀
