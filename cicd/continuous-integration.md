@@ -87,124 +87,11 @@
         -   Ve a la pestaña "Settings" del repositorio en GitHub.
         -   Selecciona "Collaborators" y añade el nombre de usuario de GitHub del "Reviewer".
 
-## Configuración de GitHub Actions para Integración Continua
-
-9.  **Crear el Workflow de GitHub Actions:**
-
-    -   En la raíz de tu repositorio, crea un directorio llamado `.github/workflows`.
-    -   Dentro de este directorio, crea un archivo YAML para definir tu workflow de CI, por ejemplo, `ci.yml`.
-
-10. **Configurar el archivo `ci.yml`:**
-
-    -   Abre el archivo `ci.yml` y pega el siguiente código.  A continuación, se explicará cada sección:
-
-    ```yaml
-    name: Build and Test
-
-    on:
-      pull_request:
-        branches:
-          - main
-
-    jobs:
-      check:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v3
-            with:
-              fetch-depth: 0
-
-          - name: Set up Node.js
-            uses: actions/setup-node@v3
-            with:
-              node-version: 22
-
-          - name: Install dependencies
-            run: npm ci
-
-          - name: Build Project
-            run: npm run build
-
-          - name: Run Tests
-            run: npm test -- --reporters=jest-junit
-
-          - name: Test Report
-            uses: dorny/test-reporter@v2
-            if: success() || failure()    
-            with:
-              path: junit.xml  
-              reporter: jest-junit 
-              name: JEST Tests
-    ```
-
-    -   **Explicación Detallada del Workflow:**
-
-        -   `name: Build and Test`:
-            -   **Paso:** Define el nombre del workflow.  Esto aparecerá en la interfaz de GitHub Actions.
-            -   **Acción:** Nombra tu workflow de manera descriptiva. En este caso, indica claramente que el workflow se encarga de construir y testear el proyecto.
-
-        -   `on:`
-            -   **Paso:** Especifica los eventos que dispararán la ejecución del workflow.
-            -   **Acción:**
-                -   `pull_request:`:  Configura el workflow para que se ejecute automáticamente cuando se crea un pull request.
-                -   `branches: - main`:  Limita la ejecución del workflow a los pull requests que tienen como destino la rama `main`.  Esto es importante para asegurar que solo los cambios que se van a integrar a la rama principal pasen por el proceso de CI.
-
-        -   `jobs:`
-            -   **Paso:** Define los trabajos (jobs) que componen el workflow. Un job es una serie de pasos que se ejecutan en un entorno virtual.
-            -   **Acción:**
-                -   `check:`:  Nombre del job.  Puedes nombrar tus jobs de acuerdo a su función.  En este caso, "check" sugiere que este job se encarga de verificar la calidad del código.
-                -   `runs-on: ubuntu-latest`:  Especifica el tipo de máquina virtual donde se ejecutará el job. `ubuntu-latest` asegura que se use la última versión estable de Ubuntu.
-
-        -   `steps:`
-            -   **Paso:** Lista de pasos que se ejecutan secuencialmente dentro de un job.  Cada paso ejecuta una acción o un comando.
-            -   **Acciones:**
-                -   `- name: Checkout code`:
-                    -   **Paso:** Describe lo que hace el paso.  Es importante poner nombres descriptivos para facilitar la lectura del workflow.
-                    -   `uses: actions/checkout@v3`:  Utiliza la acción predefinida `actions/checkout@v3` para clonar el código del repositorio en la máquina virtual.  `@v3` especifica la versión de la acción.
-                    -   `with: fetch-depth: 0`:  Configura la acción para realizar un checkout completo del historial del repositorio.  Esto puede ser necesario para algunas herramientas de análisis de código o tests que requieren acceso al historial.
-                -   `- name: Set up Node.js`:
-                    -   **Paso:** Configura el entorno de Node.js.
-                    -   `uses: actions/setup-node@v3`:  Utiliza la acción `actions/setup-node@v3` para instalar Node.js.
-                    -   `with: node-version: 22`:  Especifica la versión de Node.js que se va a utilizar.  **Asegúrate de que esta versión coincida con la que utiliza tu proyecto.**
-                -   `- name: Install dependencies`:
-                    -   **Paso:** Instala las dependencias del proyecto.
-                    -   `run: npm ci`:  Ejecuta el comando `npm ci`.  `npm ci` es similar a `npm install`, pero está optimizado para entornos de CI.  Asegura una instalación limpia basada en el `package-lock.json`.  **Si tu proyecto no usa npm, ajusta este comando (ej. `yarn install`).**
-                -   `- name: Build Project`:
-                    -   **Paso:** Construye el proyecto.
-                    -   `run: npm run build`:  Ejecuta el script `build` definido en el `package.json`.  Este comando compila el código (ej., de TypeScript a JavaScript, o para producción).  **Asegúrate de que este comando sea el correcto para tu proyecto.**
-                -   `- name: Run Tests`:
-                    -   **Paso:** Ejecuta los tests del proyecto.
-                    -   `run: npm test -- --reporters=jest-junit`:  Ejecuta el script `test` definido en el `package.json`.  El argumento `-- --reporters=jest-junit` es específico de Jest (un framework de testing de JavaScript) y configura Jest para generar un reporte en formato JUnit, que es un estándar para reportes de tests.  **Si usas un framework de testing diferente, ajusta este comando y los argumentos.**
-                -   `- name: Test Report`:
-                    -   **Paso:** Genera un reporte de los tests.
-                    -   `uses: dorny/test-reporter@v2`:  Utiliza la acción `dorny/test-reporter@v2` para procesar el reporte de tests JUnit.
-                    -   `if: success() || failure()`:  Asegura que este paso se ejecute incluso si los tests fallan.  Esto es importante para obtener un reporte completo.
-                    -   `with: path: junit.xml`:  Especifica la ruta al archivo del reporte JUnit generado por Jest.
-                    -   `reporter: jest-junit`:  Indica el formato del reporte.
-                    -   `name: JEST Tests`:  Asigna un nombre al reporte que aparecerá en la interfaz de GitHub Actions.
-
-11. **Commit y Push del Workflow:**
-
-    -   Agrega el archivo `ci.yml` a tu repositorio, haz commit y push a la rama `main`.
-
-    ```bash
-    git add .github/workflows/ci.yml
-    git commit -m "feat: add CI with GitHub Actions"
-    git push origin main
-    ```
-
-12. **Verificar la Ejecución del Workflow:**
-
-    -   Ve a la pestaña "Actions" en tu repositorio de GitHub.
-    -   Deberías ver la ejecución del workflow "Build and Test".
-    -   Haz clic en el workflow para ver los detalles de cada paso y asegurarte de que todo pasa correctamente.  Si algún paso falla, puedes revisar los logs para identificar el problema.
-
 ## Actividades
 
 ### Contributor
 
-13.  **Crear una Rama:**
+9.  **Crear una Rama:**
 
     -   Crea una nueva rama para implementar la funcionalidad de "Mover tareas completadas a tareas pendientes".
 
@@ -212,7 +99,7 @@
     git checkout -b feature/restore-completed-tasks
     ```
 
-14. **Implementar la Funcionalidad y Empujar los Cambios:**
+10. **Implementar la Funcionalidad y Empujar los Cambios:**
 
     -   Modifica el código para agregar la funcionalidad de mover tareas completadas de regreso a la lista de tareas pendientes.
     -   Realiza los commits necesarios y sube los cambios a tu rama.
@@ -251,36 +138,181 @@
     git push origin feature/restore-completed-tasks
     ```
 
-15. **Crear un Pull Request:**
+11. **Crear un Pull Request:**
 
     -   Ve a tu repositorio en GitHub y crea un pull request desde tu rama `feature/restore-completed-tasks` hacia la rama `main`.
     -   Asigna al "Reviewer" como revisor del pull request.
 
-16. **Validar los Checks de Integración:**
+12. **Validar los Checks de Integración (Antes de Configurar CI):**
 
-    -   Observa los checks de integración en el pull request. Asegúrate de que todas las pruebas y builds pasen correctamente.  **Esto ahora incluye el workflow de GitHub Actions que configuraste.**
+    -   **Antes de configurar GitHub Actions, observa el estado actual de tu proyecto.**
+    -   Ve a la pestaña "Actions" de tu repositorio.  Verás que no hay workflows personalizados definidos aún.  Esto significa que solo los checks por defecto de GitHub (si los hay) se ejecutarán al crear el pull request.
+    -   **Nota:** Es posible que veas algunos checks básicos relacionados con la capacidad de hacer merge, pero no tests automáticos ni builds.
 
 ### Reviewer
 
-17. **Revisar el Pull Request:**
+13. **Revisar el Pull Request (Antes de Configurar CI):**
 
     -   Abre el pull request que te asignaron.
     -   Revisa el código cuidadosamente, línea por línea.
     -   Haz comentarios constructivos y pide aclaraciones si es necesario.
-    -   **Además, revisa que el workflow de GitHub Actions haya pasado correctamente.** Presta atención a los detalles del reporte de tests y a los logs de cada paso.
+    -   **En este punto, la revisión se centra principalmente en la lógica y la calidad del código, ya que aún no hemos automatizado las verificaciones.**
 
-18. **Aprobar o Solicitar Cambios:**
+14. **Aprobar o Solicitar Cambios:**
+
+    -   Si el código cumple con los estándares y funciona correctamente (según la revisión manual), aprueba el pull request.
+    -   Si encuentras problemas o mejoras, solicita cambios al "Contributor".
+
+### Contributor
+
+15. **Resolver Comentarios (si es necesario):**
+
+    -   Si el "Reviewer" solicitó cambios, realiza las modificaciones necesarias y actualiza el pull request.
+    -   Una vez que el "Reviewer" apruebe, **NO HAGAS MERGE TODAVÍA**.  Vamos a configurar GitHub Actions primero.
+
+## Configuración de GitHub Actions para Integración Continua
+
+16. **Crear el Workflow de GitHub Actions:**
+
+    -   Ahora, después de haber creado el pull request y haber tenido la experiencia de revisarlo (sin CI), vamos a configurar GitHub Actions para automatizar este proceso.
+    -   En la raíz de tu repositorio, crea un directorio llamado `.github/workflows`.
+    -   Dentro de este directorio, crea un archivo YAML para definir tu workflow de CI, por ejemplo, `ci.yml`.
+
+17. **Configurar el archivo `ci.yml` con explicaciones paso a paso:**
+
+    -   Abre el archivo `ci.yml` y agrega el siguiente contenido:
+
+    ```yaml
+    name: Build and Test
+
+    on:
+      pull_request:
+        branches:
+          - main
+
+    jobs:
+      check:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v3
+            with:
+              fetch-depth: 0
+
+          - name: Set up Node.js
+            uses: actions/setup-node@v3
+            with:
+              node-version: 22
+          - name: Install dependencies
+            run: npm ci
+          - name: Build Project
+            run: npm run build
+          - name: Run Tests
+            run: npm test -- --reporters=jest-junit
+
+          - name: Test Report
+            uses: dorny/test-reporter@v2
+            if: success() || failure()    
+            with:
+              path: junit.xml  
+              reporter: jest-junit 
+              name: JEST Tests    
+
+    ```
+
+    A continuación tienes el mismo script pero con comentarios para explicar el funcionamiento:
+
+    ```yaml
+    # 1.  Define el nombre del workflow.  Esto aparecerá en la interfaz de GitHub Actions.
+    name: Build and Test
+
+    # 2. Especifica los eventos que dispararán la ejecución del workflow.
+    on:
+      pull_request: # Configura el workflow para que se ejecute automáticamente cuando se crea un pull request.
+        branches:
+          - main # Limita la ejecución del workflow a los pull requests que tienen como destino la rama `main`.
+
+    # 3. Define los trabajos (jobs) que componen el workflow. Un job es una serie de pasos que se ejecutan en un entorno virtual.
+    jobs:
+      check: # Nombre del job.  Puedes nombrar tus jobs de acuerdo a su función.
+        runs-on: ubuntu-latest # Especifica el tipo de máquina virtual donde se ejecutará el job. `ubuntu-latest` asegura que se use la última versión estable de Ubuntu.
+        # 4. Lista de pasos que se ejecutan secuencialmente dentro de un job.  Cada paso ejecuta una acción o un comando.
+        steps:
+          # 4.1  Clona el código del repositorio en la máquina virtual.
+          - name: Checkout code # Describe lo que hace el paso.
+            uses: actions/checkout@v3 # Utiliza la acción predefinida `actions/checkout@v3` para clonar el código. `@v3` especifica la versión de la acción.
+            with:
+              fetch-depth: 0 # Configura la acción para realizar un checkout completo del historial del repositorio.
+
+          # 4.2  Configura el entorno de Node.js.
+          - name: Set up Node.js
+            uses: actions/setup-node@v3 # Utiliza la acción `actions/setup-node@v3` para instalar Node.js.
+            with:
+              node-version: 22 # Especifica la versión de Node.js que se va a utilizar.  Asegúrate de que esta versión coincida con la que utiliza tu proyecto.
+          # 4.3 Instala las dependencias del proyecto.
+          - name: Install dependencies
+            run: npm ci # Ejecuta el comando `npm ci`.  `npm ci` está optimizado para entornos de CI.  Asegura una instalación limpia basada en el `package-lock.json`.  Si tu proyecto no usa npm, ajusta este comando (ej. `yarn install`).
+          # 4.4 Construye el proyecto.
+          - name: Build Project
+            run: npm run build # Ejecuta el script `build` definido en el `package.json`.  Este comando compila el código (ej., de TypeScript a JavaScript, o para producción).  Asegúrate de que este comando sea el correcto para tu proyecto.
+          # 4.5 Ejecuta los tests del proyecto.
+          - name: Run Tests
+            run: npm test -- --reporters=jest-junit # Ejecuta el script `test` definido en el `package.json`.  El argumento `-- --reporters=jest-junit` es específico de Jest y configura Jest para generar un reporte en formato JUnit.  Si usas un framework de testing diferente, ajusta este comando y los argumentos.
+
+          # 4.6 Genera un reporte de los tests.
+          - name: Test Report
+            uses: dorny/test-reporter@v2 # Utiliza la acción `dorny/test-reporter@v2` para procesar el reporte de tests JUnit.
+            if: success() || failure() # Asegura que este paso se ejecute incluso si los tests fallan.
+            with:
+              path: junit.xml # Especifica la ruta al archivo del reporte JUnit generado por Jest.
+              reporter: jest-junit # Indica el formato del reporte.
+              name: JEST Tests # Asigna un nombre al reporte que aparecerá en la interfaz de GitHub Actions.
+    ```
+
+18. **Commit y Push del Workflow:**
+
+    -   Agrega el archivo `ci.yml` a tu repositorio, haz commit y push a la rama `main`.
+
+    ```bash
+    git add .github/workflows/ci.yml
+    git commit -m "feat: add CI with GitHub Actions"
+    git push origin main
+    ```
+
+19. **Verificar la Ejecución del Workflow:**
+
+    -   Ve a la pestaña "Actions" en tu repositorio de GitHub.
+    -   Deberías ver la ejecución del workflow "Build and Test".
+    -   Haz clic en el workflow para ver los detalles de cada paso y asegurarte de que todo pasa correctamente. Si algún paso falla, puedes revisar los logs para identificar el problema.
+
+20. **Validar los Checks de Integración (Después de Configurar CI):**
+
+    -   Ahora, vuelve a tu pull request.  **Observa la diferencia!**
+    -   Deberías ver los checks de GitHub Actions ejecutándose.
+    -   Asegúrate de que todas las pruebas y builds pasen correctamente.  **Esto ahora incluye el workflow de GitHub Actions que configuraste.**
+
+### Reviewer
+
+21. **Revisar el Pull Request (Después de Configurar CI):**
+
+    -   Abre el pull request que te asignaron.
+    -   Revisa el código cuidadosamente, línea por línea.
+    -   Haz comentarios constructivos y pide aclaraciones si es necesario.
+    -   **Ahora, la revisión incluye la validación de los resultados de GitHub Actions.** Presta atención a los detalles del reporte de tests y a los logs de cada paso.
+
+22. **Aprobar o Solicitar Cambios:**
 
     -   Si el código cumple con los estándares, funciona correctamente y el workflow de CI pasa, aprueba el pull request.
     -   Si encuentras problemas o mejoras, solicita cambios al "Contributor".
 
 ### Contributor
 
-19. **Resolver Comentarios (si es necesario):**
+23. **Resolver Comentarios (si es necesario):**
 
     -   Si el "Reviewer" solicitó cambios, realiza las modificaciones necesarias y actualiza el pull request.
     -   Una vez que el "Reviewer" apruebe, puedes hacer merge del pull request a la rama `main`.
 
-20. **Observar la Pipeline:**
+24. **Observar la Pipeline (Final - Después del Merge):**
 
-    -   Revisa que la pipeline de CI/CD (GitHub Actions) se ejecute correctamente en la rama main, después de hacer merge de los cambios.
+    -   Después de hacer merge, ve a la pestaña "Actions" y observa la ejecución del workflow en la rama `main`.
+    -   Esto confirma que la integración continua sigue funcionando para la rama principal, asegurando que los nuevos cambios no rompan la aplicación.
