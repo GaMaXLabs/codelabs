@@ -189,6 +189,9 @@
       pull_request:
         branches:
           - main
+      push:
+        branches:
+          - main
 
     jobs:
       check:
@@ -231,6 +234,9 @@
       pull_request: # Configura el workflow para que se ejecute automáticamente cuando se crea un pull request.
         branches:
           - main # Limita la ejecución del workflow a los pull requests que tienen como destino la rama `main`.
+      push:
+        branches:
+          - main
 
     # 3. Define los trabajos (jobs) que componen el workflow. Un job es una serie de pasos que se ejecutan en un entorno virtual.
     jobs:
