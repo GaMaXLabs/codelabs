@@ -1,97 +1,170 @@
-# Laboratorio Práctico: Despliegue continuo
+#   Laboratorio Práctico: Despliegue continuo
 
 **Proyecto:** To Do List
 
-**Actividad:** Agregar despliegue continuo a Firebase Hosting usando GitHub Actions.
+**Actividad:** Configurar un workflow de GitHub Actions dedicado para el despliegue continuo a Firebase Hosting.
 
-## Instrucciones Iniciales
+**Pre-requisito:** Se asume que has completado exitosamente el laboratorio de Integración Continua. Este laboratorio continúa donde lo dejaste. Si no tienes ese avance, puedes usar la rama `lab/cicd/add-ci-pipeline` que contiene el resultado final del laboratorio de Integración Continua.
 
-1.  **Fork del Repositorio:**
-    * Ve al repositorio [https://github.com/GaMaXLabs/todo-list](https://github.com/GaMaXLabs/todo-list)
-    * Haz clic en el botón "Fork" en la esquina superior derecha.
-    * Esto creará una copia del repositorio en tu propia cuenta de GitHub.
+##   Instrucciones Iniciales
 
-2.  **Clonar tu Repositorio Forjado:**
-    * Abre tu terminal y ejecuta el siguiente comando, reemplazando `[tu-usuario-de-github]` con tu nombre de usuario de GitHub:
+1.  **Clonar el Repositorio (o Continuar con el Existente):**
 
-    ```bash
-    git clone [https://github.com/](https://github.com/)[tu-usuario-de-github]/todo-list.git
-    cd todo-list
-    ```
+    * Si estás continuando desde el laboratorio de Integración Continua, puedes seguir trabajando con el repositorio que ya tienes clonado.
+    * Si necesitas comenzar desde el punto final del laboratorio de Integración Continua, clona el repositorio y luego haz checkout a la rama `lab/cicd/add-ci-pipeline`:
 
-3.  **Revisión de la Estructura del Proyecto:**
-    * Tómate unos minutos para familiarizarte con la estructura del proyecto "To Do List". Observa los archivos HTML, CSS y JavaScript que componen la aplicación web.
-
-4.  **Revisión del Archivo de Workflow de GitHub Actions:**
-    * Explora el archivo `.github/workflows/firebase-deploy.yml` (o un nombre similar). Este archivo define el workflow de GitHub Actions que utilizaremos para automatizar el despliegue.
-
-## Actividades
-
-5.  **Crear una Nueva Rama:**
-    * Crea una nueva rama para realizar tus modificaciones. Esto mantiene el `main` limpio hasta que tus cambios estén listos.
         ```bash
-        git checkout -b feature/firebase-deploy
+        git clone [https://github.com/GaMaXLabs/todo-list](https://github.com/GaMaXLabs/todo-list)
+        cd todo-list
+        git checkout lab/cicd/add-ci-pipeline
         ```
 
-6.  **Personalización del Workflow:**
-    * Abre el archivo `.github/workflows/firebase-deploy.yml` en tu editor de código.
-    * Revisa y personaliza el workflow según las necesidades del proyecto. Presta atención a las siguientes secciones:
-        * `on`: Define los eventos que activan el workflow (por ejemplo, `push` a la rama `main`).
-        * `jobs`: Define las tareas que se ejecutarán en el workflow (por ejemplo, build, test, deploy).
-        * `steps`: Define los comandos y acciones que se ejecutan en cada tarea (por ejemplo, instalar dependencias, ejecutar pruebas, desplegar a Firebase).
-    * Asegúrate de configurar correctamente los pasos para la compilación de la aplicación web si es necesario (ej: npm run build).
+2.  **Revisión de la Estructura del Proyecto:**
 
-7.  **Configuración del Despliegue a Firebase Hosting:**
-    * Asegúrate de que el workflow incluya un paso para desplegar la aplicación a Firebase Hosting. Puedes usar la acción `FirebaseExtended/action-hosting-deploy@v0`.
-    * Deberás configurar el token de Firebase en los "Secrets" de tu repositorio de GitHub:
-        1.  Obtén tu token de firebase ejecutando en tu terminal: `firebase login:ci`.
-        2.  En tu repositorio de github, navega a `Settings > Secrets > Actions > New repository secret`.
-        3.  Agrega el token, la clave de este secret debe de llamarse `FIREBASE_TOKEN`
-    * Revisa que el archivo de configuración `firebase.json` en tu repositorio este configurado correctamente, ejemplo:
+    * Tómate unos minutos para familiarizarte con la estructura del proyecto "To Do List". Observa los archivos HTML, CSS y JavaScript que componen la aplicación web.
 
-    ```json
-    {
-      "hosting": {
-        "public": "dist",
-        "ignore": [
-          "firebase.json",
-          "**/.*",
-          "**/node_modules/**"
-        ],
-        "rewrites": [
-          {
-            "source": "**",
-            "destination": "/index.html"
+3.  **Revisión de los Archivos de Workflow de GitHub Actions (si existen):**
+
+    * Explora los archivos en el directorio `.github/workflows/`. Puede que ya exista un archivo de CI (`ci.yml`) del laboratorio anterior. Ahora crearemos uno nuevo para CD.
+
+##   Actividades
+
+4.  **Crear una Nueva Rama:**
+
+    * Crea una nueva rama para realizar tus modificaciones. Esto mantiene el `main` limpio hasta que tus cambios estén listos.
+
+        ```bash
+        git checkout -b feature/firebase-cd
+        ```
+
+5.  **Configurar el Archivo `.firebaserc`:**
+
+    * **IMPORTANTE:** Dado que creaste tu propio proyecto de Firebase en el laboratorio de Integración Continua, es crucial que el archivo `.firebaserc` apunte a tu proyecto específico.
+    * Abre el archivo `.firebaserc` en tu editor de código. Deberías ver una estructura similar a esta:
+
+        ```json
+        {
+          "projects": {
+            "default": "tu-proyecto-aqui"
           }
-        ]
-      }
-    }
-    ```
+        }
+        ```
 
-    * Recuerda reemplazar `"dist"` con el directorio de compilación de tu proyecto, si es necesario.
+    * Reemplaza `"tu-proyecto-aqui"` con el **ID de tu proyecto de Firebase**. Puedes encontrar el ID de tu proyecto en la consola de Firebase.
+    * Guarda el archivo.
 
-8.  **Agregar un cambio al repositorio:**
-    * Realiza un cambio sencillo en tu aplicación, modifica por ejemplo el titulo del html principal.
-    * Agrega los cambios al commit y subelos a la rama creada:
-    ```bash
-    git add .
-    git commit -m "feat: cambio en el titulo principal"
-    git push origin feature/firebase-deploy
-    ```
+6.  **Crear el Workflow de Despliegue (`cd.yml`):**
 
-9.  **Observar la Ejecución de la Pipeline:**
+    * En el directorio `.github/workflows/`, crea un nuevo archivo llamado `cd.yml`.
+    * Agrega el siguiente contenido a `cd.yml`:
+
+        ```yaml
+        name: Deploy to Firebase Hosting on merge
+
+        on:
+          push:
+            branches:
+              - main
+
+        jobs:
+          build_and_deploy:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v4
+              - run: echo "REACT_APP_FIREBASE_RTDB_URL=${{ secrets.REACT_APP_FIREBASE_RTDB_URL }}" >> $GITHUB_ENV
+              - run: npm ci && npm run build
+              - uses: FirebaseExtended/action-hosting-deploy@v0
+                with:
+                  repoToken: '${{ secrets.GITHUB_TOKEN }}'
+                  firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+                  channelId: live
+                  projectId: #[firebase_project_id] # ¡Reemplaza con tu Project ID!
+                  target: app
+        ```
+
+    * **IMPORTANTE:**
+        * Reemplaza `#[firebase_project_id]` con el **ID de tu proyecto de Firebase**. Asegúrate de que coincida con el que usaste en el `.firebaserc`.
+        * Este workflow se activará automáticamente cuando se haga push a la rama `main`.
+        * El paso `echo "REACT_APP_FIREBASE_RTDB_URL=${{ secrets.REACT_APP_FIREBASE_RTDB_URL }}" >> $GITHUB_ENV` es crucial para pasar la URL de la base de datos de Firebase a tu entorno de construcción.
+
+7.  **Configurar los Secretos de GitHub Actions:**
+
+    * Para que GitHub Actions pueda desplegar a tu proyecto de Firebase, necesitas configurar los siguientes secretos:
+        * `FIREBASE_SERVICE_ACCOUNT`: Contiene la clave privada de una cuenta de servicio de Firebase.
+        * `GITHUB_TOKEN`: Este token lo proporciona automáticamente GitHub Actions y se usa para acceder al repositorio. Ya lo estamos usando en el yml.
+        * `REACT_APP_FIREBASE_RTDB_URL`: Contiene la URL de tu base de datos de Firebase Realtime Database.
+
+8.  **Obtener la Clave de la Cuenta de Servicio de Firebase:**
+
+    * En la consola de Firebase, ve a tu proyecto.
+    * Ve a "Configuración del proyecto" (el ícono del engranaje).
+    * Selecciona "Cuentas de servicio".
+    * Haz clic en "Generar nueva clave privada".
+    * Selecciona "Firebase Admin SDK" y haz clic en "Generar clave".
+    * Se descargará un archivo JSON con la clave privada. **¡Guarda este archivo en un lugar seguro!** No lo compartas ni lo subas a tu repositorio.
+    * Abre el archivo JSON en un editor de texto y copia todo su contenido.
+
+9.  **Agregar el Secreto `FIREBASE_SERVICE_ACCOUNT` a GitHub:**
+
+    * En tu repositorio de GitHub, ve a "Settings" (Configuración).
+    * Selecciona "Security" y luego "Secrets and variables" y "Actions".
+    * Haz clic en "New repository secret".
+    * En el campo "Name", escribe `FIREBASE_SERVICE_ACCOUNT`.
+    * En el campo "Value", pega el contenido del archivo JSON que copiaste en el paso anterior.
+    * Haz clic en "Add secret".
+
+10. **Agregar el Secreto `REACT_APP_FIREBASE_RTDB_URL` a GitHub:**
+
+    * En tu repositorio de GitHub, ve a "Settings" (Configuración).
+    * Selecciona "Security" y luego "Secrets and variables" y "Actions".
+    * Haz clic en "New repository secret".
+    * En el campo "Name", escribe `REACT_APP_FIREBASE_RTDB_URL`.
+    * En el campo "Value", pega la URL de tu base de datos de Firebase Realtime Database. **(¡Asegúrate de que sea la misma que usaste en el archivo `.env` en el laboratorio de CI! )**
+    * Haz clic en "Add secret".
+
+11. **Personalización del Workflow (Opcional):**
+
+    * Revisa el archivo `cd.yml` y comprende cada sección:
+        * `on`: Define el evento que dispara el workflow (push a `main`).
+        * `jobs`: Define el trabajo a realizar (`build_and_deploy`).
+        * `steps`: Define los pasos dentro del trabajo (checkout, configuración de variables de entorno, build, deploy).
+    * Si tu proyecto tiene un comando de build diferente a `npm run build`, ajústalo.
+
+12. **Agregar y Commitear los Cambios:**
+
+    * Agrega el nuevo archivo `cd.yml` a tu repositorio, haz commit y push a la rama `feature/firebase-cd`.
+
+        ```bash
+        git add .github/workflows/cd.yml
+        git commit -m "feat: add Firebase CD workflow and secrets"
+        git push origin feature/firebase-cd
+        ```
+
+13. **Crear un Pull Request:**
+
+    * Crea un pull request desde tu rama `feature/firebase-cd` hacia la rama `main`.
+
+14. **Observar la Ejecución del Workflow:**
+
     * Ve a la pestaña "Actions" en tu repositorio de GitHub.
-    * Observa cómo se ejecuta el workflow que has configurado. Podrás ver los logs de cada paso y verificar si el despliegue a Firebase fue exitoso.
+    * Después de hacer merge a `main`, observa cómo se ejecuta el workflow `Deploy to Firebase Hosting on merge`.
+    * Verifica que el despliegue a Firebase Hosting sea exitoso.
 
-10. **Merge de los cambios a main:**
-    * Una vez que estes seguro que todo esta funcionando correctamente, haz merge de los cambios a la rama main.
-    * Esto disparara de nuevo el workflow, desplegando los cambios a producción.
-    ```bash
-    git checkout main
-    git merge feature/firebase-deploy
-    git push origin main
-    ```
+15. **Merge de los Cambios a `main`:**
 
-## Soporte en Tiempo Real
+    * Una vez que hayas verificado que el workflow se ejecuta correctamente y el despliegue es exitoso, haz merge de tu pull request a la rama `main`.
+    * Esto activará automáticamente el workflow de CD y desplegará tu aplicación a Firebase Hosting.
+
+        ```bash
+        git checkout main
+        git merge feature/firebase-cd
+        git push origin main
+        ```
+
+16. **Verificar el Despliegue:**
+
+    * Ve a la consola de Firebase y verifica que tu aplicación se haya desplegado correctamente en Firebase Hosting.
+
+##   Soporte en Tiempo Real
 
 * Los instructores estarán disponibles para responder a tus preguntas y guiarte a través del laboratorio. ¡No dudes en pedir ayuda!
