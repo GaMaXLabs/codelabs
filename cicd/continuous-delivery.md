@@ -75,17 +75,21 @@
               - run: npm ci && npm run build
               - uses: FirebaseExtended/action-hosting-deploy@v0
                 with:
+                {% raw %}
                   repoToken: '${{ secrets.GITHUB_TOKEN }}'
                   firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
                   channelId: live
                   projectId: #[firebase_project_id] # ¡Reemplaza con tu Project ID!
                   target: app
+                {% endraw %}
         ```
 
     * **IMPORTANTE:**
         * Reemplaza `#[firebase_project_id]` con el **ID de tu proyecto de Firebase**. Asegúrate de que coincida con el que usaste en el `.firebaserc`.
         * Este workflow se activará automáticamente cuando se haga push a la rama `main`.
+        {% raw %}
         * El paso `echo "REACT_APP_FIREBASE_RTDB_URL=${{ secrets.REACT_APP_FIREBASE_RTDB_URL }}" >> $GITHUB_ENV` es crucial para pasar la URL de la base de datos de Firebase a tu entorno de construcción.
+        {% endraw %}
 
 7.  **Configurar los Secretos de GitHub Actions:**
 
